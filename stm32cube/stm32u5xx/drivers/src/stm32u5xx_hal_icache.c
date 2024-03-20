@@ -34,7 +34,7 @@
         cache invalidate maintenance operation, error management and TrustZone
         security support.
 
-    (+) The ICACHE provides additionally the possibility to remap input address
+    (+) The ICACHE provides additionnaly the possibility to remap input address
         falling into up to four memory regions (used to remap aliased code in
         external memories to the internal Code region, for execution)
 
@@ -44,13 +44,10 @@
   [..]
      The ICACHE HAL driver can be used as follows:
 
-    (#) Optionally configure the Instruction Cache mode with
-        @ref HAL_ICACHE_ConfigAssociativityMode() if the default configuration
-        does not suit the application requirements.
-
     (#) Enable and disable the Instruction Cache with respectively
-        @ref HAL_ICACHE_Enable() and @ref HAL_ICACHE_Disable().
-        Use @ref HAL_ICACHE_IsEnabled() to get the Instruction Cache status.
+        @ref HAL_ICACHE_Enable() and @ref HAL_ICACHE_Disable()
+
+    (#) Configure the Instruction Cache mode with @ref HAL_ICACHE_ConfigAssociativityMode()
 
     (#) Initiate the cache maintenance invalidation procedure with either
         @ref HAL_ICACHE_Invalidate() (blocking mode) or @ref HAL_ICACHE_Invalidate_IT()
@@ -236,9 +233,9 @@ HAL_StatusTypeDef HAL_ICACHE_Disable(void)
   HAL_StatusTypeDef status = HAL_OK;
   uint32_t tickstart;
 
-  /* Make sure BSYENDF is reset before to disable the instruction cache */
-  /* as it automatically starts a cache invalidation procedure */
-  WRITE_REG(ICACHE->FCR, ICACHE_FCR_CBSYENDF);
+  /* Reset BSYENDF before to disable the instruction cache */
+  /* that starts a cache invalidation procedure */
+  CLEAR_BIT(ICACHE->FCR, ICACHE_FCR_CBSYENDF);
 
   CLEAR_BIT(ICACHE->CR, ICACHE_CR_EN);
 
@@ -263,15 +260,6 @@ HAL_StatusTypeDef HAL_ICACHE_Disable(void)
 }
 
 /**
-  * @brief  Check whether the Instruction Cache is enabled or not.
-  * @retval Status (0: disabled, 1: enabled)
-  */
-uint32_t HAL_ICACHE_IsEnabled(void)
-{
-  return ((READ_BIT(ICACHE->CR, ICACHE_CR_EN) != 0U) ? 1UL : 0UL);
-}
-
-/**
   * @brief  Invalidate the Instruction Cache.
   * @note   This function waits for the end of cache invalidation procedure
   *         and clears the associated BSYENDF flag.
@@ -289,7 +277,7 @@ HAL_StatusTypeDef HAL_ICACHE_Invalidate(void)
   else
   {
     /* Make sure BSYENDF is reset before to start cache invalidation */
-    WRITE_REG(ICACHE->FCR, ICACHE_FCR_CBSYENDF);
+    CLEAR_BIT(ICACHE->FCR, ICACHE_FCR_CBSYENDF);
 
     /* Launch cache invalidation */
     SET_BIT(ICACHE->CR, ICACHE_CR_CACHEINV);
@@ -319,7 +307,7 @@ HAL_StatusTypeDef HAL_ICACHE_Invalidate_IT(void)
   }
   else
   {
-    /* Make sure BSYENDF is reset before to start cache invalidation */
+    /* Make sure BSYENDF is reset */
     WRITE_REG(ICACHE->FCR, ICACHE_FCR_CBSYENDF);
 
     /* Enable end of cache invalidation interrupt */
@@ -487,7 +475,7 @@ void HAL_ICACHE_IRQHandler(void)
     /* Disable error interrupt */
     CLEAR_BIT(ICACHE->IER, ICACHE_IER_ERRIE);
 
-    /* Clear ERR pending flag */
+    /* Clear ICACHE error pending flag */
     WRITE_REG(ICACHE->FCR, ICACHE_FCR_CERRF);
 
     /* Instruction cache error interrupt user callback */
@@ -500,7 +488,7 @@ void HAL_ICACHE_IRQHandler(void)
     /* Disable end of cache invalidation interrupt */
     CLEAR_BIT(ICACHE->IER, ICACHE_IER_BSYENDIE);
 
-    /* Clear BSYENDF pending flag */
+    /* Clear ICACHE busyend pending flag */
     WRITE_REG(ICACHE->FCR, ICACHE_FCR_CBSYENDF);
 
     /* Instruction cache busyend interrupt user callback */

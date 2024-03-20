@@ -10,8 +10,6 @@
 #     STM32 xml database pin configuration names. The regular expression should
 #     be as precise as possible. Note that it needs to be escaped here in the
 #     configuration file.
-#     Note: Specific "ANALOG" value allows generation of analog pins
-#     configuration
 #
 #   - mode (optional): Mode setting (analog, alternate). Mode needs to
 #     be set according to the following rules:
@@ -35,10 +33,6 @@
 #
 
 ---
-- name: Analog
-  match: "ANALOG"
-  mode: analog
-
 - name: ADC_IN / ADC_INN / ADC_INP
   match: "^ADC(?:\\d+)?_IN[NP]?\\d+$"
 
@@ -178,10 +172,6 @@
 - name: LTDC
   match: "^LTDC_(?:DE|CLK|HSYNC|VSYNC|R[0-7]|G[0-7]|B[0-7])$"
 
-- name: OCTOSPI
-  match: "^OCTOSPI(.*)(?:CLK|NCS|DQS|IO[0-7])$"
-  slew-rate: very-high-speed
-
 - name: QUADSPI
   match: "^QUADSPI(\\d+)?_(?:CLK|NCS|BK1_NCS|BK1_IO[0-3]|BK2_NCS|BK2_IO[0-3])$"
   slew-rate: very-high-speed
@@ -229,10 +219,6 @@
   drive: open-drain
   bias: pull-up
 
-- name: UART_DE / USART_DE / LPUART_DE
-  match: "^(?:LP)?US?ART\\d+_DE$"
-  drive: push-pull
-
 - name: UART_TX / USART_TX / LPUART_TX
   match: "^(?:LP)?US?ART\\d+_TX$"
   bias: pull-up
@@ -247,7 +233,7 @@
   match: "^USB_OTG_HS_(?:DM)?(?:DP)?(?:SOF)?(?:ID)?(?:VBUS)?$"
 
 - name: USB_OTG_HS_ULPI
-  match: "^USB_OTG_HS_ULPI_(?:CK)?(?:DIR)?(?:STP)?(?:NXT)?(?:D\\d+)?$"
+  match: "^USB_OTG_HS_ULPI_(?:DIR)?(?:STP)?(?:NXT)?(?:D\\d+)?$"
 
 - name: USB
   match: "^USB_(?:DM)?(?:DP)?(?:NOE)?$"

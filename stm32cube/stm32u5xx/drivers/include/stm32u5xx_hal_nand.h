@@ -375,3 +375,4 @@ uint32_t              HAL_NAND_Read_Status(NAND_HandleTypeDef *hnand);
 #endif
 
 #endif /* STM32U5xx_HAL_NAND_H */
+

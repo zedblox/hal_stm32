@@ -11,12 +11,13 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2017 STMicroelectronics.
-  * All rights reserved.
+  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics.
+  * All rights reserved.</center></h2>
   *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
   *
   ******************************************************************************
   */
@@ -30,7 +31,7 @@
 
 #if defined(RNG)
 
-/** @addtogroup RNG_Ex
+/** @addtogroup RNGEx
   * @brief RNG Extended HAL module driver.
   * @{
   */
@@ -39,7 +40,7 @@
 #if defined(RNG_CR_CONDRST)
 /* Private types -------------------------------------------------------------*/
 /* Private defines -----------------------------------------------------------*/
-/** @defgroup RNG_Ex_Private_Defines RNGEx Private Defines
+/** @defgroup RNGEx_Private_Defines RNGEx Private Defines
   * @{
   */
 /*  Health test control register information to use in CCM algorithm */
@@ -54,7 +55,7 @@
   */
 /* Private variables ---------------------------------------------------------*/
 /* Private constants ---------------------------------------------------------*/
-/** @defgroup RNG_Ex_Private_Constants RNGEx Private Constants
+/** @defgroup RNGEx_Private_Constants RNGEx Private Constants
   * @{
   */
 #define RNG_TIMEOUT_VALUE     2U
@@ -66,11 +67,11 @@
 /* Private functions  --------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
 
-/** @addtogroup RNG_Ex_Exported_Functions
+/** @addtogroup RNGEx_Exported_Functions
   * @{
   */
 
-/** @addtogroup RNG_Ex_Exported_Functions_Group1
+/** @addtogroup RNGEx_Exported_Functions_Group1
   *  @brief   Configuration functions
   *
 @verbatim
@@ -155,13 +156,9 @@ HAL_StatusTypeDef HAL_RNGEx_SetConfig(RNG_HandleTypeDef *hrng, RNG_ConfigTypeDef
     {
       if ((HAL_GetTick() - tickstart) > RNG_TIMEOUT_VALUE)
       {
-        /* New check to avoid false timeout detection in case of prememption */
-        if (HAL_IS_BIT_SET(hrng->Instance->CR, RNG_CR_CONDRST))
-        {
-          hrng->State = HAL_RNG_STATE_READY;
-          hrng->ErrorCode = HAL_RNG_ERROR_TIMEOUT;
-          return HAL_ERROR;
-        }
+        hrng->State = HAL_RNG_STATE_READY;
+        hrng->ErrorCode = HAL_RNG_ERROR_TIMEOUT;
+        return HAL_ERROR;
       }
     }
 
@@ -283,7 +280,7 @@ HAL_StatusTypeDef HAL_RNGEx_LockConfig(RNG_HandleTypeDef *hrng)
   * @}
   */
 
-/** @addtogroup RNG_Ex_Exported_Functions_Group2
+/** @addtogroup RNGEx_Exported_Functions_Group2
   *  @brief   Recover from seed error function
   *
 @verbatim
@@ -351,3 +348,4 @@ HAL_StatusTypeDef HAL_RNGEx_RecoverSeedError(RNG_HandleTypeDef *hrng)
   * @}
   */
 
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

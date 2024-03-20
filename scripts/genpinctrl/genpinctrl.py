@@ -185,34 +185,12 @@ def format_remap(remap):
         DT remap definition.
     """
 
-    if remap == 0 or remap is None:
+    if remap == 0:
         return "NO_REMAP"
-    else:
+    elif remap is not None:
         return remap
 
-
-def format_remap_name(remap):
-    """Format remap value for DT node name
-
-    Args:
-        remap: Remap definition.
-
-    Returns:
-        DT remap definition in lower caps
-    """
-
-    if remap == 0 or remap is None:
-        return ""
-    elif "REMAP0" in remap:
-        return ""
-    elif "REMAP1" in remap:
-        return "_remap1"
-    elif "REMAP2" in remap:
-        return "_remap2"
-    elif "REMAP3" in remap:
-        return "_remap3"
-    else:
-        return ""
+    raise ValueError(f"Unsupported remap: {remap}")
 
 
 def get_gpio_ip_afs(data_path):
@@ -436,8 +414,6 @@ def get_mcu_signals(data_path, gpio_ip_afs):
             # process all pin signals
             for signal in pin.findall(NS + "Signal"):
                 if signal.get("Name") == "GPIO":
-                    if signal.get("IOModes") and "Analog" in signal.get("IOModes"):
-                        pin_signals.append({"name": "ANALOG", "af": None})
                     continue
 
                 signal_name = signal.get("Name")
@@ -482,7 +458,6 @@ def main(data_path, output):
     env.filters["format_mode"] = format_mode
     env.filters["format_mode_f1"] = format_mode_f1
     env.filters["format_remap"] = format_remap
-    env.filters["format_remap_name"] = format_remap_name
     pinctrl_template = env.get_template(PINCTRL_TEMPLATE)
     readme_template = env.get_template(README_TEMPLATE)
 
@@ -582,7 +557,7 @@ def main(data_path, output):
     # write readme file
     commit_raw = check_output(["git", "rev-parse", "HEAD"], cwd=data_path)
     commit = commit_raw.decode("utf-8").strip()
-    with open(output / "README.rst", "w") as f:
+    with open(output / "README.md", "w") as f:
         f.write(readme_template.render(commit=commit))
 
 

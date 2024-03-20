@@ -696,3 +696,4 @@ uint32_t              HAL_DCMI_GetError(DCMI_HandleTypeDef *hdcmi);
 #endif
 
 #endif /* STM32U5xx_HAL_DCMI_H */
+

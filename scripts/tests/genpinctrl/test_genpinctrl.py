@@ -7,7 +7,6 @@ from genpinctrl import (
     format_mode,
     format_mode_f1,
     format_remap,
-    format_remap_name,
     get_gpio_ip_afs,
     get_mcu_signals,
     main,
@@ -147,17 +146,9 @@ def test_format_remap():
 
     assert format_remap("UART1_REMAP1") == "UART1_REMAP1"
     assert format_remap(0) == "NO_REMAP"
-    assert format_remap(None) == "NO_REMAP"
 
-
-def test_format_remap_name():
-    """Test that format_remap_name works."""
-
-    assert format_remap_name("UART1_REMAP3") == "_remap3"
-    assert format_remap_name("UART1_REMAP2") == "_remap2"
-    assert format_remap_name("UART1_REMAP1") == "_remap1"
-    assert format_remap_name("UART1_REMAP0") == ""
-    assert format_remap_name(None) == ""
+    with pytest.raises(ValueError):
+        format_remap(None)
 
 
 def test_get_gpio_ip_afs(pindata):
@@ -250,8 +241,8 @@ def test_main(data, pindata, tmp_path, mocker):
     main(pindata, tmp_path)
 
     # check readme file
-    ref_readme_file = data / "README.rst"
-    gen_readme_file = tmp_path / "README.rst"
+    ref_readme_file = data / "README.md"
+    gen_readme_file = tmp_path / "README.md"
 
     assert gen_readme_file.exists()
 

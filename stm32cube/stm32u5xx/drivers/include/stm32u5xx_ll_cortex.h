@@ -55,15 +55,6 @@ extern "C" {
 /* Private types -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private constants ---------------------------------------------------------*/
-/** @defgroup CORTEX_LL_EC_REGION_ACCESS CORTEX LL MPU Region Access Attributes
-  * @{
-  */
-/* Register MPU_RBAR (Cortex-M33) : bits [4:0] */
-#define MPU_ACCESS_MSK                     (MPU_RBAR_SH_Msk|MPU_RBAR_AP_Msk|MPU_RBAR_XN_Msk)
-/**
-  * @}
-  */
-
 /* Private macros ------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
@@ -107,9 +98,9 @@ extern "C" {
 /** @defgroup CORTEX_LL_MPU_Attributes CORTEX LL MPU Attributes
   * @{
   */
-#define  LL_MPU_DEVICE_NGNRNE          0x0U  /* Device, noGather, noReorder, noEarly acknowledge. */
-#define  LL_MPU_DEVICE_NGNRE           0x4U  /* Device, noGather, noReorder, Early acknowledge.   */
-#define  LL_MPU_DEVICE_NGRE            0x8U  /* Device, noGather, Reorder, Early acknowledge.     */
+#define  LL_MPU_DEVICE_nGnRnE          0x0U  /* Device, noGather, noReorder, noEarly acknowledge. */
+#define  LL_MPU_DEVICE_nGnRE           0x4U  /* Device, noGather, noReorder, Early acknowledge.   */
+#define  LL_MPU_DEVICE_nGRE            0x8U  /* Device, noGather, Reorder, Early acknowledge.     */
 #define  LL_MPU_DEVICE_GRE             0xCU  /* Device, Gather, Reorder, Early acknowledge.       */
 
 #define  LL_MPU_WRITE_THROUGH          0x0U  /* Normal memory, write-through. */
@@ -442,11 +433,11 @@ __STATIC_INLINE uint32_t LL_CPUID_GetVariant(void)
 }
 
 /**
-  * @brief  Get Architecture version
-  * @rmtoll SCB_CPUID    ARCHITECTURE  LL_CPUID_GetArchitecture
-  * @retval Value should be equal to 0xF for Cortex-M33 ("ARMv8-M with Main Extension")
+  * @brief  Get Constant number
+  * @rmtoll SCB_CPUID    ARCHITECTURE  LL_CPUID_GetConstant
+  * @retval Value should be equal to 0xF for Cortex-M33 devices
   */
-__STATIC_INLINE uint32_t LL_CPUID_GetArchitecture(void)
+__STATIC_INLINE uint32_t LL_CPUID_GetConstant(void)
 {
   return (uint32_t)(READ_BIT(SCB->CPUID, SCB_CPUID_ARCHITECTURE_Msk) >> SCB_CPUID_ARCHITECTURE_Pos);
 }
@@ -534,7 +525,7 @@ __STATIC_INLINE void LL_MPU_Disable(void)
 {
   /* Make sure outstanding transfers are done */
   __DMB();
-  /* Disable MPU */
+  /* Disable MPU*/
   WRITE_REG(MPU->CTRL, 0U);
 }
 
@@ -602,7 +593,7 @@ __STATIC_INLINE void LL_MPU_EnableRegion(uint32_t Region)
 
 /**
   * @brief  Check if MPU region is enabled or not
-  * @rmtoll MPU_RNR     ENABLE        LL_MPU_IsEnabled_Region
+  * @rmtoll MPU_RNR     ENABLE        LL_MPU_IsEnabledRegion
   * @param  Region This parameter can be one of the following values:
   *         @arg @ref LL_MPU_REGION_NUMBER0
   *         @arg @ref LL_MPU_REGION_NUMBER1
@@ -617,11 +608,7 @@ __STATIC_INLINE void LL_MPU_EnableRegion(uint32_t Region)
   */
 __STATIC_INLINE uint32_t LL_MPU_IsEnabled_Region(uint32_t Region)
 {
-  /* Set region index */
-  WRITE_REG(MPU->RNR, Region);
-
-  /* Return MPU region status */
-  return ((READ_BIT(MPU->RLAR, MPU_RLAR_EN_Msk) == (MPU_RLAR_EN_Msk)) ? 1UL : 0UL);
+  return ((READ_BIT(MPU->RNR, Region) == (Region)) ? 1UL : 0UL);
 }
 
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
@@ -651,7 +638,7 @@ __STATIC_INLINE void LL_MPU_EnableRegion_NS(uint32_t Region)
 
 /**
   * @brief  Check if non-secure MPU region is enabled or not
-  * @rmtoll MPU_RNR     ENABLE        LL_MPU_IsEnabled_Region_NS
+  * @rmtoll MPU_RNR     ENABLE        LL_MPU_IsEnableRegion_NS
   * @param  Region This parameter can be one of the following values:
   *         @arg @ref LL_MPU_REGION_NUMBER0
   *         @arg @ref LL_MPU_REGION_NUMBER1
@@ -666,11 +653,7 @@ __STATIC_INLINE void LL_MPU_EnableRegion_NS(uint32_t Region)
   */
 __STATIC_INLINE uint32_t LL_MPU_IsEnabled_Region_NS(uint32_t Region)
 {
-  /* Set region index */
-  WRITE_REG(MPU_NS->RNR, Region);
-
-  /* Return non-secure MPU region status */
-  return ((READ_BIT(MPU_NS->RLAR, MPU_RLAR_EN_Msk) == (MPU_RLAR_EN_Msk)) ? 1UL : 0UL);
+  return ((READ_BIT(MPU_NS->RNR, Region) == (Region)) ? 1UL : 0UL);
 }
 #endif /* __ARM_FEATURE_CMSE */
 
@@ -768,17 +751,18 @@ __STATIC_INLINE void LL_MPU_DisableRegion_NS(uint32_t Region)
 __STATIC_INLINE void LL_MPU_ConfigRegion(uint32_t Region, uint32_t Attributes, uint32_t AttrIndx, uint32_t BaseAddress,
                                          uint32_t LimitAddress)
 {
-  /* Set region index */
+  /* Set Region number */
   WRITE_REG(MPU->RNR, Region);
 
   /* Set base address */
   MPU->RBAR |=  Attributes;
+  /* Set base address */
+  MPU->RBAR |= (BaseAddress & 0xFFFFFFE0U);
 
-  /* Set region base address and region access attributes */
-  WRITE_REG(MPU->RBAR, ((BaseAddress & MPU_RBAR_BASE_Msk) | Attributes));
-
-  /* Set region limit address, memory attributes index and enable region */
-  WRITE_REG(MPU->RLAR, ((LimitAddress & MPU_RLAR_LIMIT_Msk) | AttrIndx | MPU_RLAR_EN_Msk));
+  /* Set limit address */
+  MPU->RLAR |= (LimitAddress & 0xFFFFFFE0U);
+  /* Configure MPU */
+  MPU->RLAR |= (MPU_RLAR_EN_Msk | AttrIndx);
 }
 
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
@@ -827,11 +811,16 @@ __STATIC_INLINE void LL_MPU_ConfigRegion_NS(uint32_t Region, uint32_t Attributes
   /* Set Region number */
   WRITE_REG(MPU_NS->RNR, Region);
 
-  /* Set region base address and region access attributes */
-  WRITE_REG(MPU_NS->RBAR, ((BaseAddress & MPU_RBAR_BASE_Msk) | Attributes));
+  /* Set base address */
+  MPU_NS->RBAR |=  Attributes;
 
-  /* Set region limit address, memory attributes index and enable region */
-  WRITE_REG(MPU_NS->RLAR, ((LimitAddress & MPU_RLAR_LIMIT_Msk) | AttrIndx | MPU_RLAR_EN_Msk));
+  /* Set base address */
+  MPU_NS->RBAR |= (BaseAddress & 0xFFFFFFE0U);
+
+  /* Set limit address */
+  MPU_NS->RLAR |= (LimitAddress & 0xFFFFFFE0U);
+  /* Configure MPU */
+  MPU_NS->RLAR |= (MPU_RLAR_EN_Msk | AttrIndx);
 }
 #endif /* __ARM_FEATURE_CMSE */
 
@@ -858,12 +847,11 @@ __STATIC_INLINE void LL_MPU_ConfigRegionAddress(uint32_t Region, uint32_t BaseAd
 {
   /* Set Region number */
   WRITE_REG(MPU->RNR, Region);
+  /* Set base address */
+  MPU->RBAR |= (BaseAddress & 0xFFFFFFE0U) ;
 
-  /* Modify region base address */
-  MODIFY_REG(MPU->RBAR, MPU_RBAR_BASE_Msk, (BaseAddress & MPU_RBAR_BASE_Msk));
-
-  /* Modify region limit address */
-  MODIFY_REG(MPU->RLAR, MPU_RLAR_LIMIT_Msk, (LimitAddress & MPU_RLAR_LIMIT_Msk));
+  /* Set limit address */
+  MPU->RLAR |= (LimitAddress & 0xFFFFFFE0U);
 }
 
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
@@ -890,12 +878,11 @@ __STATIC_INLINE void LL_MPU_ConfigRegionAddress_NS(uint32_t Region, uint32_t Bas
 {
   /* Set Region number */
   WRITE_REG(MPU_NS->RNR, Region);
-
   /* Set base address */
-  MODIFY_REG(MPU_NS->RBAR, MPU_RBAR_BASE_Msk, (BaseAddress & MPU_RBAR_BASE_Msk));
+  MPU_NS->RBAR |= (BaseAddress & 0xFFFFFFE0U);
 
   /* Set limit address */
-  MODIFY_REG(MPU_NS->RLAR, MPU_RLAR_LIMIT_Msk, (LimitAddress & MPU_RLAR_LIMIT_Msk));
+  MPU_NS->RLAR |= (LimitAddress & 0xFFFFFFE0U);
 }
 #endif /* __ARM_FEATURE_CMSE */
 
@@ -917,17 +904,15 @@ __STATIC_INLINE void LL_MPU_ConfigRegionAddress_NS(uint32_t Region, uint32_t Bas
   */
 __STATIC_INLINE void LL_MPU_ConfigAttributes(uint32_t AttIndex, uint32_t  Attributes)
 {
-  /* When selected index is in range [0;3] */
   if (AttIndex < LL_MPU_ATTRIBUTES_NUMBER4)
   {
-    /* Modify Attr<i> field of MPU_MAIR0 accordingly */
-    MODIFY_REG(MPU->MAIR0, (0xFFU << (AttIndex * 8U)), (Attributes << (AttIndex * 8U)));
+    /* Program MPU_MAIR0 */
+    WRITE_REG(MPU->MAIR0, (Attributes << (AttIndex * 8U)));
   }
-  /* When selected index is in range [4;7] */
   else
   {
-    /* Modify Attr<i> field of MPU_MAIR1 accordingly */
-    MODIFY_REG(MPU->MAIR1, (0xFFU << ((AttIndex - 4U) * 8U)), (Attributes << ((AttIndex - 4U) * 8U)));
+    /* Program MPU_MAIR1 */
+    WRITE_REG(MPU->MAIR1, (Attributes << ((AttIndex - 4U) * 8U)));
   }
 }
 
@@ -950,17 +935,15 @@ __STATIC_INLINE void LL_MPU_ConfigAttributes(uint32_t AttIndex, uint32_t  Attrib
   */
 __STATIC_INLINE void LL_MPU_ConfigAttributes_NS(uint32_t AttIndex, uint32_t  Attributes)
 {
-  /* When selected index is in range [0;3] */
   if (AttIndex < LL_MPU_ATTRIBUTES_NUMBER4)
   {
-    /* Modify Attr<i> field of MPU_MAIR0_NS accordingly */
-    MODIFY_REG(MPU_NS->MAIR0, (0xFFU << (AttIndex * 8U)), (Attributes << (AttIndex * 8U)));
+    /* Program MPU_MAIR0 */
+    WRITE_REG(MPU_NS->MAIR0, (Attributes << (AttIndex * 8U)));
   }
-  /* When selected index is in range [4;7] */
   else
   {
-    /* Modify Attr<i> field of MPU_MAIR1_NS accordingly */
-    MODIFY_REG(MPU_NS->MAIR1, (0xFFU << ((AttIndex - 4U) * 8U)), (Attributes << ((AttIndex - 4U) * 8U)));
+    /* Program MPU_MAIR1 */
+    WRITE_REG(MPU_NS->MAIR1, (Attributes << ((AttIndex - 4U) * 8U)));
   }
 }
 #endif /* __ARM_FEATURE_CMSE */
@@ -986,9 +969,8 @@ __STATIC_INLINE void LL_MPU_SetRegionLimitAddress(uint32_t Region, uint32_t Limi
 {
   /* Set Region number */
   WRITE_REG(MPU->RNR, Region);
-
   /* Set limit address */
-  MODIFY_REG(MPU->RLAR, MPU_RLAR_LIMIT_Msk, (LimitAddress & MPU_RLAR_LIMIT_Msk));
+  MPU->RLAR |= (LimitAddress & 0xFFFFFFE0U);
 }
 
 /**
@@ -1009,7 +991,6 @@ __STATIC_INLINE uint32_t LL_MPU_GetRegionLimitAddress(uint32_t Region)
 {
   /* Set Region number */
   WRITE_REG(MPU->RNR, Region);
-
   return (READ_REG(MPU->RLAR & MPU_RLAR_LIMIT_Msk));
 }
 
@@ -1034,9 +1015,8 @@ __STATIC_INLINE void LL_MPU_SetRegionBaseAddress(uint32_t Region, uint32_t BaseA
 {
   /* Set Region number */
   WRITE_REG(MPU->RNR, Region);
-
   /* Set base address */
-  MODIFY_REG(MPU->RBAR, MPU_RBAR_BASE_Msk, (BaseAddress & MPU_RBAR_BASE_Msk));
+  MPU->RBAR |= (BaseAddress & 0xFFFFFFE0U);
 }
 
 /**
@@ -1057,7 +1037,6 @@ __STATIC_INLINE uint32_t LL_MPU_GetRegionBaseAddress(uint32_t Region)
 {
   /* Set Region number */
   WRITE_REG(MPU->RNR, Region);
-
   return (READ_REG(MPU->RBAR & MPU_RBAR_BASE_Msk));
 }
 
@@ -1089,9 +1068,8 @@ __STATIC_INLINE void LL_MPU_SetRegionAccess(uint32_t Region, uint32_t Attributes
 {
   /* Set Region number */
   WRITE_REG(MPU->RNR, Region);
-
   /* Set base address */
-  MODIFY_REG(MPU->RBAR, MPU_ACCESS_MSK, (Attributes & MPU_ACCESS_MSK));
+  MPU->RBAR |=  Attributes;
 }
 
 /**
@@ -1115,7 +1093,6 @@ __STATIC_INLINE uint32_t LL_MPU_GetRegionAccess(uint32_t Region)
 {
   /* Set Region number */
   WRITE_REG(MPU->RNR, Region);
-
   return (READ_REG(MPU->RBAR & (MPU_RBAR_XN_Msk | MPU_RBAR_AP_Msk | MPU_RBAR_SH_Msk)));
 }
 
@@ -1141,9 +1118,8 @@ __STATIC_INLINE void LL_MPU_SetRegionLimitAddress_NS(uint32_t Region, uint32_t L
 {
   /* Set Region number */
   WRITE_REG(MPU_NS->RNR, Region);
-
   /* Set limit address */
-  MODIFY_REG(MPU_NS->RLAR, MPU_RLAR_LIMIT_Msk, (LimitAddress & MPU_RLAR_LIMIT_Msk));
+  MPU_NS->RLAR |= (LimitAddress & 0xFFFFFFE0U);
 }
 
 /**
@@ -1164,7 +1140,6 @@ __STATIC_INLINE uint32_t LL_MPU_GetRegionLimitAddress_NS(uint32_t Region)
 {
   /* Set Region number */
   WRITE_REG(MPU_NS->RNR, Region);
-
   return (READ_REG(MPU_NS->RLAR & MPU_RLAR_LIMIT_Msk));
 }
 
@@ -1189,9 +1164,8 @@ __STATIC_INLINE void LL_MPU_SetRegionBaseAddress_NS(uint32_t Region, uint32_t Ba
 {
   /* Set Region number */
   WRITE_REG(MPU_NS->RNR, Region);
-
   /* Set base address */
-  MODIFY_REG(MPU_NS->RBAR, MPU_RBAR_BASE_Msk, (BaseAddress & MPU_RBAR_BASE_Msk));
+  MPU_NS->RBAR |= (BaseAddress & 0xFFFFFFE0U);
 }
 
 /**
@@ -1212,7 +1186,6 @@ __STATIC_INLINE uint32_t LL_MPU_GetRegionBaseAddress_NS(uint32_t Region)
 {
   /* Set Region number */
   WRITE_REG(MPU_NS->RNR, Region);
-
   return (READ_REG(MPU_NS->RBAR & MPU_RBAR_BASE_Msk));
 }
 
@@ -1244,9 +1217,8 @@ __STATIC_INLINE void LL_MPU_SetRegionAccess_NS(uint32_t Region, uint32_t Attribu
 {
   /* Set Region number */
   WRITE_REG(MPU_NS->RNR, Region);
-
   /* Set base address Attributes */
-  MODIFY_REG(MPU_NS->RBAR, MPU_ACCESS_MSK, (Attributes & MPU_ACCESS_MSK));
+  MPU_NS->RBAR |=  Attributes;
 }
 
 /**
@@ -1270,7 +1242,6 @@ __STATIC_INLINE uint32_t LL_MPU_GetRegionAccess_NS(uint32_t Region)
 {
   /* Set Region number */
   WRITE_REG(MPU_NS->RNR, Region);
-
   return (READ_REG(MPU_NS->RBAR & (MPU_RBAR_XN_Msk | MPU_RBAR_AP_Msk | MPU_RBAR_SH_Msk)));
 }
 #endif /* __ARM_FEATURE_CMSE */

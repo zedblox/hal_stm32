@@ -29,7 +29,6 @@
        and HAL_SDEx_WriteBlocksDMAMultiBuffer() functions.
 
   @endverbatim
-  ******************************************************************************
   */
 
 /* Includes ------------------------------------------------------------------*/
@@ -381,6 +380,10 @@ HAL_StatusTypeDef HAL_SDEx_DMALinkedList_WriteBlocks(SD_HandleTypeDef *hsd, SDMM
   */
 
 #endif /* HAL_SD_MODULE_ENABLED */
+
+/**
+  * @}
+  */
 
 /**
   * @}

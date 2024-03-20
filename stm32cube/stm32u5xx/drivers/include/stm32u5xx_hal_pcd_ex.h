@@ -22,7 +22,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32u5xx_hal_def.h"
@@ -82,7 +82,7 @@ void HAL_PCDEx_BCD_Callback(PCD_HandleTypeDef *hpcd, PCD_BCD_MsgTypeDef msg);
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif
 
 
 #endif /* STM32U5xx_HAL_PCD_EX_H */

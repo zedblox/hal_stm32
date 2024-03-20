@@ -6,12 +6,13 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2017 STMicroelectronics.
-  * All rights reserved.
+  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics.
+  * All rights reserved.</center></h2>
   *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
   *
   ******************************************************************************
   */
@@ -63,7 +64,7 @@ typedef struct
 {
   FunctionalState Activation; /*!< Output clock enable/disable */
   uint32_t        Selection;  /*!< Output clock is system clock or audio clock.
-                                   This parameter can be a value of @ref DFSDM_Channel_OutputClock */
+                                   This parameter can be a value of @ref DFSDM_Channel_OuputClock */
   uint32_t        Divider;    /*!< Output clock divider.
                                    This parameter must be a number between Min_Data = 2 and Max_Data = 256 */
 } DFSDM_Channel_OutputClockTypeDef;
@@ -307,11 +308,11 @@ typedef void (*pDFSDM_Filter_AwdCallbackTypeDef)(DFSDM_Filter_HandleTypeDef *hdf
   * @{
   */
 
-/** @defgroup DFSDM_Channel_OutputClock DFSDM channel output clock selection
+/** @defgroup DFSDM_Channel_OuputClock DFSDM channel output clock selection
   * @{
   */
-#define DFSDM_CHANNEL_OUTPUT_CLOCK_SYSTEM    0x00000000U             /*!< Source for output clock is system clock */
-#define DFSDM_CHANNEL_OUTPUT_CLOCK_AUDIO     DFSDM_CHCFGR1_CKOUTSRC  /*!< Source for output clock is audio clock */
+#define DFSDM_CHANNEL_OUTPUT_CLOCK_SYSTEM    0x00000000U             /*!< Source for ouput clock is system clock */
+#define DFSDM_CHANNEL_OUTPUT_CLOCK_AUDIO     DFSDM_CHCFGR1_CKOUTSRC  /*!< Source for ouput clock is audio clock */
 /**
   * @}
   */
@@ -892,3 +893,5 @@ uint32_t                      HAL_DFSDM_FilterGetError(DFSDM_Filter_HandleTypeDe
 #endif
 
 #endif /* STM32L4xx_HAL_DFSDM_H */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

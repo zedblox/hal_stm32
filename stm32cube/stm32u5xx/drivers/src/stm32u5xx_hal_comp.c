@@ -845,7 +845,7 @@ void HAL_COMP_IRQHandler(COMP_HandleTypeDef *hcomp)
     HAL_COMP_TriggerCallback(hcomp);
 #endif /* USE_HAL_COMP_REGISTER_CALLBACKS */
   }
-  else if (READ_BIT(EXTI->FPR1, exti_line) != 0UL)
+  else
   {
     /* Check whether comparator is in independent or window mode */
     if (READ_BIT(hcomp->Instance->CSR, COMP_CSR_WINMODE) != 0UL)
@@ -872,10 +872,16 @@ void HAL_COMP_IRQHandler(COMP_HandleTypeDef *hcomp)
     HAL_COMP_TriggerCallback(hcomp);
 #endif /* USE_HAL_COMP_REGISTER_CALLBACKS */
   }
-  else
-  {
-    /* nothing to do */
-  }
+
+  /* Change COMP state */
+  hcomp->State = HAL_COMP_STATE_READY;
+
+  /* COMP trigger user callback */
+#if (USE_HAL_COMP_REGISTER_CALLBACKS == 1)
+  hcomp->TriggerCallback(hcomp);
+#else
+  HAL_COMP_TriggerCallback(hcomp);
+#endif /* USE_HAL_COMP_REGISTER_CALLBACKS */
 }
 
 /**

@@ -697,3 +697,5 @@ uint32_t               HAL_DMA2D_GetError(DMA2D_HandleTypeDef *hdma2d);
 #endif
 
 #endif /* STM32U5xx_HAL_DMA2D_H */
+
+

@@ -28,3 +28,5 @@ void shci_register_io_bus(tSHciIO* fops)
 
   return;
 }
+
+/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
